@@ -67,20 +67,20 @@ func init() {
 	// Basic flags
 	kubeVipCmd.PersistentFlags().StringVar(&initConfig.Interface, "interface", "", "Name of the interface to bind to")
 	kubeVipCmd.PersistentFlags().StringVar(&initConfig.ServicesInterface, "serviceInterface", "", "Name of the interface to bind to (for services)")
-	kubeVipCmd.PersistentFlags().StringVar(&initConfig.VIP, "vip", "", "The Virtual IP address")
+	kubeVipCmd.PersistentFlags().StringVar(&initConfig.VIP, "vip", "", "The Virtual IP address (deprecated)")
 	kubeVipCmd.PersistentFlags().StringVar(&initConfig.VIPSubnet, "vipSubnet", "", "The Virtual IP address subnet e.g. /32 /24 /8 etc..")
-
 	kubeVipCmd.PersistentFlags().StringVar(&initConfig.VIPCIDR, "cidr", "32", "The CIDR range for the virtual IP address") // todo: deprecate
-
 	kubeVipCmd.PersistentFlags().StringVar(&initConfig.Address, "address", "", "an address (IP or DNS name) to use as a VIP")
 	kubeVipCmd.PersistentFlags().IntVar(&initConfig.Port, "port", 6443, "Port for the VIP")
 	kubeVipCmd.PersistentFlags().BoolVar(&initConfig.EnableARP, "arp", false, "Enable Arp for VIP changes")
 	kubeVipCmd.PersistentFlags().BoolVar(&initConfig.EnableWireguard, "wireguard", false, "Enable Wireguard for services VIPs")
 	kubeVipCmd.PersistentFlags().BoolVar(&initConfig.EnableRoutingTable, "table", false, "Enable Routing Table for services VIPs")
+	kubeVipCmd.PersistentFlags().StringVar(&initConfig.BackendAddress, "backendAddress", "0.0.0.0", "The API server backend address")
+	kubeVipCmd.PersistentFlags().IntVar(&initConfig.BackendPort, "backendPort", 6443, "The API server backend port")
 
 	// LoadBalancer flags
 	kubeVipCmd.PersistentFlags().BoolVar(&initConfig.EnableLoadBalancer, "enableLoadBalancer", false, "enable loadbalancing on the VIP with IPVS")
-	kubeVipCmd.PersistentFlags().IntVar(&initConfig.LoadBalancerPort, "lbPort", 6443, "loadbalancer port for the VIP")
+	kubeVipCmd.PersistentFlags().IntVar(&initConfig.LoadBalancerPort, "lbPort", 6443, "loadbalancer port for the VIP (deprecated)")
 	kubeVipCmd.PersistentFlags().StringVar(&initConfig.LoadBalancerForwardingMethod, "lbForwardingMethod", "local", "loadbalancer forwarding method")
 	kubeVipCmd.PersistentFlags().BoolVar(&initConfig.DDNS, "ddns", false, "use Dynamic DNS + DHCP to allocate VIP for address")
 

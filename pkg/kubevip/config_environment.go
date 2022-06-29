@@ -11,7 +11,6 @@ import (
 
 // ParseEnvironment - will popultate the configuration from environment variables
 func ParseEnvironment(c *Config) error {
-
 	// Ensure that logging is set through the environment variables
 	env := os.Getenv(vipLogLevel)
 	if env != "" {
@@ -104,6 +103,20 @@ func ParseEnvironment(c *Config) error {
 		c.Port = int(i)
 	}
 
+	env = os.Getenv(vipBackendAddress)
+	if env != "" {
+		c.Address = env
+	}
+
+	// Find vip port
+	env = os.Getenv(vipBackendPort)
+	if env != "" {
+		i, err := strconv.ParseInt(env, 10, 32)
+		if err != nil {
+			return err
+		}
+		c.Port = int(i)
+	}
 	// Find vipDdns
 	env = os.Getenv(vipDdns)
 	if env != "" {
