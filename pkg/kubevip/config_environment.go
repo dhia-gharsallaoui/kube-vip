@@ -1,6 +1,7 @@
 package kubevip
 
 import (
+	"fmt"
 	"os"
 	"strconv"
 
@@ -80,6 +81,8 @@ func ParseEnvironment(c *Config) error {
 	// Find vip address
 	env = os.Getenv(vipAddress)
 	if env != "" {
+		fmt.Println("vip address")
+		fmt.Println(env)
 		// TODO - parse address net.Host()
 		c.VIP = env
 		// } else {
@@ -89,6 +92,8 @@ func ParseEnvironment(c *Config) error {
 	// Find address
 	env = os.Getenv(address)
 	if env != "" {
+		fmt.Println("address env")
+		fmt.Println(env)
 		// TODO - parse address net.Host()
 		c.Address = env
 	}
@@ -105,17 +110,19 @@ func ParseEnvironment(c *Config) error {
 
 	env = os.Getenv(vipBackendAddress)
 	if env != "" {
-		c.Address = env
+		fmt.Println("backend address")
+		fmt.Println(env)
+		c.BackendAddress = env
 	}
 
-	// Find vip port
+	// Find backend port
 	env = os.Getenv(vipBackendPort)
 	if env != "" {
 		i, err := strconv.ParseInt(env, 10, 32)
 		if err != nil {
 			return err
 		}
-		c.Port = int(i)
+		c.BackendPort = int(i)
 	}
 	// Find vipDdns
 	env = os.Getenv(vipDdns)

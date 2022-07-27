@@ -33,6 +33,18 @@ func NewForwarder(srcAddress string, srcPort int, dstAddress string, dstPort int
 
 func (f *forwarder) Start(ctx context.Context) error {
 	log.Infoln("starting forwarder nftables")
+
+	log.Infoln("src Address")
+	log.Infoln(f.srcAddress)
+
+	log.Infoln("src port")
+	log.Infoln(f.srcPort)
+
+	log.Infoln("dst address")
+	log.Infoln(f.dstAddress)
+
+	fmt.Println("dst Port")
+	fmt.Println(f.dstPort)
 	// If backend address is quad-zero route, early return
 	// (destination address is unknown, can't setup forwarding).
 	// If at some point we want to prepare forwarding none the less we would have to pick up any interface

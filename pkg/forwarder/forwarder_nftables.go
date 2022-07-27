@@ -42,6 +42,7 @@ func startNFTables(ctx context.Context, srcAddress string, srcPort int, destAddr
 			//creating the connection
 			c, err := ForwardRules(srcAddress, srcPort, destAddress, destPort)
 			if err != nil {
+				log.Infoln("failed at forward rules")
 				return err
 			}
 			return c.Flush()
@@ -80,52 +81,30 @@ func ForwardRules(srcAddress string, srcPort int, destAddress string, destPort i
 		Name:   "KUBE-VIP",
 	}
 	kubeForwarder = c.AddTable(kubeForwarder)
-	log.Debugln("table created")
+	log.Infoln("table created")
 	prerouting := c.AddChain(&nftables.Chain{
-		Name:     "prerouting",
+		Name:     "PREROUTING",
 		Table:    kubeForwarder,
 		Hooknum:  nftables.ChainHookPrerouting,
-		Priority: nftables.ChainPriorityFilter,
+		Priority: nftables.ChainPriorityNATDest,
 		Type:     nftables.ChainTypeNAT,
 	})
 	postrouting := c.AddChain(&nftables.Chain{
-		Name:     "postrouting",
+		Name:     "POSTROUTING",
 		Table:    kubeForwarder,
 		Hooknum:  nftables.ChainHookPostrouting,
-		Priority: nftables.ChainPriorityFilter,
+		Priority: nftables.ChainPriorityNATSource,
 		Type:     nftables.ChainTypeNAT,
 	})
 	output := c.AddChain(&nftables.Chain{
-		Name:     "output",
+		Name:     "OUTPUT",
 		Table:    kubeForwarder,
 		Hooknum:  nftables.ChainHookOutput,
-		Priority: nftables.ChainPriorityFilter,
+		Priority: nftables.ChainPriorityNATDest,
 		Type:     nftables.ChainTypeNAT,
 	})
 	//creating the sets containing the ip addresses
-	log.Debugln("chains created")
-	srcSet := &nftables.Set{
-		Name:    "Source",
-		Table:   kubeForwarder,
-		KeyType: nftables.TypeIPAddr,
-	}
-	destSet := &nftables.Set{
-		Name:    "Dest",
-		Table:   kubeForwarder,
-		KeyType: nftables.TypeIPAddr,
-	}
-	if err := c.AddSet(srcSet, []nftables.SetElement{
-		{Key: net.ParseIP(srcAddress)},
-	}); err != nil {
-		log.Errorf("error in adding the source set")
-		return nil, err
-	}
-	if err := c.AddSet(destSet, []nftables.SetElement{
-		{Key: net.ParseIP(destAddress)},
-	}); err != nil {
-		log.Errorf("error in adding the destination set")
-		return nil, err
-	}
+	log.Infoln("chains created")
 	// finishing the rule to make the function work
 	c.AddRule(&nftables.Rule{
 		Table: kubeForwarder,
@@ -187,6 +166,10 @@ func ForwardRules(srcAddress string, srcPort int, destAddress string, destPort i
 				RegProtoMin: 2,
 				Random:      true,
 			},
+			&expr.Verdict{
+				// [ immediate reg 0 drop ]
+				Kind: expr.VerdictAccept,
+			},
 		},
 	})
 
@@ -230,7 +213,12 @@ func ForwardRules(srcAddress string, srcPort int, destAddress string, destPort i
 				Data:     binaryutil.BigEndian.PutUint16(uint16(destPort)),
 			},
 			//masq
-			&expr.Masq{Random: true, FullyRandom: true},
+			&expr.Masq{Random: true},
+
+			&expr.Verdict{
+				// [ immediate reg 0 drop ]
+				Kind: expr.VerdictAccept,
+			},
 		},
 	})
 
@@ -292,13 +280,17 @@ func ForwardRules(srcAddress string, srcPort int, destAddress string, destPort i
 				RegProtoMin: 2,
 				Random:      true,
 			},
+			&expr.Verdict{
+				// [ immediate reg 0 drop ]
+				Kind: expr.VerdictAccept,
+			},
 		},
 	})
 	return c, nil
 }
 
 func teardownNFTables(c *nftables.Conn, table *nftables.Table) error {
-
+	log.Infoln("tearing down tables")
 	c.FlushTable(table)
 	ch, err := c.ListChains()
 

@@ -48,7 +48,9 @@ func (cluster *Cluster) vipService(ctxArp, ctxDNS, ctxFwd context.Context, c *ku
 	}
 
 	log.Infof("creating new forwarder")
-
+	fmt.Println("testing values")
+	fmt.Println(c.Address)
+	fmt.Println(c.BackendAddress)
 	fwd := forwarder.NewForwarder(c.Address, c.Port, c.BackendAddress, c.BackendPort, c.EnableLoadBalancer, c.LoadBalancerForwardingMethod)
 	if err := fwd.Start(ctxFwd); err != nil {
 		log.Errorf("Forwarder start error: %v", err)
